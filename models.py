@@ -15,6 +15,7 @@ def load_text_model():
         bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=torch.float16,
     )
+
     model = AutoModelForCausalLM.from_pretrained(
         "microsoft/Phi-3-mini-4k-instruct",
         device_map="cuda",
@@ -22,6 +23,14 @@ def load_text_model():
         quantization_config=conf,
         trust_remote_code=True,
     )
+
+    # model = AutoModelForCausalLM.from_pretrained(
+    #     "microsoft/Phi-3-mini-4k-instruct",
+    #     device_map="cuda",
+    #     torch_dtype="auto",
+    #     trust_remote_code=True,
+    # )
+
     tokenizers = AutoTokenizer.from_pretrained("microsoft/Phi-3-mini-4k-instruct")
 
     pipe = pipeline(
@@ -39,8 +48,6 @@ def generate_text(pipe: Pipeline, prompt: str, temperature: float = 0.7) -> str:
         {"role": "user", "content": prompt},
     ]
 
-    #prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-
     predictions = pipe(messages,
                        temperature=temperature,
                        max_new_tokens=256,
@@ -50,4 +57,4 @@ def generate_text(pipe: Pipeline, prompt: str, temperature: float = 0.7) -> str:
 
     output = predictions[0]["generated_text"]
 
-    return output
+    return output[2]["content"]
